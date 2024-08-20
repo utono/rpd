@@ -1,10 +1,10 @@
 // Keyboard layouts for hyprland real-prog-dvorak
 //
-// To make the system recognize your new layout, update the cache:
-//      sudo dpkg-reconfigure xkb-data
+// sudo cp ~/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak /usr/share/X11/xkb/symbols/
 //
 // ~/.config/hypr/hyprland.conf
-// input:kb_layout = real_prog_dvorak
+// input {
+//      kb_layout = real_prog_dvorak
 //
 // or, if using us_custom
 // input:kb_layout = us_custom(custom_variant)
