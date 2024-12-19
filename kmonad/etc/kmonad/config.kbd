@@ -1,0 +1,28 @@
+(defcfg
+  ;; input (device-file "/dev/input/by-id/usb-Dell_Dell_USB_Entry_Keyboard-event-kbd")
+  input (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd")
+  output (uinput-sink "Kmonad: Dell")
+  fallthrough true
+)
+
+(defalias
+  caps_esc (tap-hold-next 145 esc lmeta)
+  ;; Homerow modifiers
+  sfta (tap-hold-next-release 145 a lshift)
+  mets (tap-hold-next-release 145 o lmeta)
+  altd (tap-hold-next-release 145 e lalt)
+  ctlf (tap-hold-next-release 145 u lctrl)
+
+  ctlj (tap-hold-next-release 145 h rctrl)
+  altk (tap-hold-next-release 145 t ralt)
+  metl (tap-hold-next-release 145 n lmeta)
+  sft; (tap-hold-next-release 145 s rshift)
+)
+
+(defsrc
+  caps a  s  d  f  g  h  j  k  l  ;
+)
+
+(deflayer mylayer
+  @caps_esc @sfta @mets @altd @ctlf i d @ctlj @altk @metl @sft;
+)
