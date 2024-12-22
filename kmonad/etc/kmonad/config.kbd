@@ -6,13 +6,50 @@
   allow-cmd true
 )
 
+;;(deflayer
+;;  -       -       -       -       -       -       -       -       -       -       -       -       -     ins     del
+;;  -       -       -       -       -       -       -       -       -       -       -       -       -             bspc
+;;  -       -       -       -       -       -       -       -       -       -       -       -       -             bksl
+;;  -       -       -       -       -       -       -       -       -       -       -       -                     ret
+;;  -       -       -       -       -       -       -       -       -       -       -                             rsft
+;;  lctl    lmet    lalt              spc                           ralt  rctl      up      left    right         down
+;;)
+
+;;(deflayer rpd
+;;  esc       f1      f2    f3      f4      f5    f6    f7      f8    f9    f10   f11  f12  ins           del
+;;  $         +       [     {       \(      &     =     \)      }     ]     *     !    |                  bspc
+;;  tab       ;       ,     .       p       y     f     g       c     r     l     /    @                  \
+;;  caps      a       o     e       u       i     d     h       t     n     s     -                       ret
+;;  lsft      '       q     j       k       x     b     m       w     v     z                             rsft
+;;  lctl      lmet    lalt           spc                        ralt  rctl                  up left right down
+;;)
+;;
+;;
+;;(deflayer rpd-shift
+;;  esc       f1      f2    f3      f4      f5    f6    f7      f8    f9    f10   f11  f12  ins           del
+;;  ~         1       2     3       4       5     6     7       8     9     0     %    `                  bspc
+;;  tab       :       <     >       P       Y     F     G       C     R     L     ?    ?                  #
+;;  caps      A       O     E       U       I     D     H       T     N     S     _                       ret
+;;  lsft      "       Q     J       K       X     B     M       W     V     Z                             rsft
+;;  lctl      lmet    lalt           spc                        ralt  rctl                  up left right down
+;;)
+
 (defsrc
-  esc       f1      f2    f3    f4    f5   f6   f7   f8    f9    f10    f11   f12   ins                 del
-  `         1       2     3     4     5    6    7    8     9     0      -     =                         bspc
-  tab       q       w     e     r     t    y    u    i     o     p      [     ]                         bksl
-  caps      a       s     d     f     g    h    j    k     l     ;      '                               ret
-  lsft      z       x     c     v     b    n    m    ,     .     /                                      rsft
-  lctl      lmet    lalt           spc                        ralt  rctl                  up left right down
+  esc       f1      f2      f3      f4      f5      f6      f7      f8      f9      f10     f11     f12   ins     del
+  `         1       2       3       4       5       6       7       8       9       0       -       =             bspc
+  tab       q       w       e       r       t       y       u       i       o       p       [       ]             bksl
+  caps      a       s       d       f       g       h       j       k       l       ;       '                     ret
+  lsft      z       x       c       v       b       n       m       ,       .       /                             rsft
+  lctl      lmet    lalt              spc                           ralt  rctl      up      left    right         down
+)
+
+(deflayer rpd
+  esc       f1      f2    f3      f4      f5    f6    f7      f8    f9    f10   f11  f12  ins           del
+  $         +       [     {       \(      &     =     \)      }     ]     *     !    |                  bspc
+  tab       ;       ,     .       p       y     f     g       c     r     l     /    @                  \
+  caps      a       o     e       u       i     d     h       t     n     s     -                       ret
+  lsft      '       q     j       k       x     b     m       w     v     z                             rsft
+  lctl      lmet    lalt           spc                        ralt  rctl                  up left @r2q down
 )
 
 (deflayer rpdv
@@ -24,7 +61,6 @@
   @lcl      @lml    @lal           spc                        ralt  @rcl                  up left right down
 )
 
-;;  ~         1       2     3     4     5    6    7    8     9     0      %     `           _
 (deflayer rpdv-lsft
   _         _       _     _     _     _     _     _     _     _     _      _     _     _     _
   ~         @ls1    @ls2  @ls3  @ls4  @ls5  @ls6  @ls7  @ls8  @ls9  @ls0   %     @ls`        _
@@ -35,20 +71,30 @@
 )
 
 (deflayer qwerty
-  esc  f1   f2   f3   f4        f5   f6   f7   f8        f9   f10  f11  f12 ins del
-  `    1    2    3    4    5    6    7    8    9    0    -    =         bspc
-  tab  q    w    e    r    t    y    u    i    o    p    [    ]         bksl
-  caps a    s    d    f    g    h    j    k    l    ;    '              ret
-  lsft z    x    c    v    b    n    m    ,    .    /                   rsft
-  lctl      lmet lalt           spc                                ralt rctl       up  left  right  down
+  esc   f1    f2    f3    f4    f5    f6    f7    f8    f9    f10   f11   f12   ins   del
+  `     1     2     3     4     5     6     7     8     9     0     -     =           bspc
+  tab   q     w     e     r     t     y     u     i     o     p     [     ]           bksl
+  caps  a     s     d     f     g     h     j     k     l     ;     '                ret
+  lsft  z     x     c     v     b     n     m     ,     .     /                      rsft
+  lctl  lmet  lalt        spc                   ralt  rctl  up    left  @q2r   down
 )
 
-;; Layers
 (defalias
-  qwe (layer-switch qwerty)
-  dvk (layer-switch rpdv)
+  q2r (layer-switch rpd)       ;; Switch from QWERTY to RPD
+  r2q (layer-switch qwerty)    ;; Switch from RPD to QWERTY
+  r2rs (layer-switch rpd-shift) ;; Switch from RPD to RPD-Shift
+  rs2r (layer-switch rpd)      ;; Switch from RPD-Shift to RPD
+)
+
+(defalias
   lsl (around (layer-toggle rpdv-lsft) lsft)
 )
+
+(defalias
+  C-A-q (around (tap-hold-next-release 185 (chord lctl lalt q)) (layer-switch qwerty))
+  C-A-d (around (tap-hold-next-release 185 (chord lctl lalt d)) (layer-switch rpdv))
+)
+
 
 ;; Modifier keys
 (defalias
