@@ -1,25 +1,37 @@
 #!/usr/bin/env bash
-# This script sets up a custom keyboard layout, configuration files, and services 
-# for an Arch Linux system. It performs the following tasks:
-# 
-# 1. Verifies that the script is run with root privileges and required tools are installed.
-# 2. Configures the keyd service by ensuring it's installed, setting up configuration files, 
-#    and enabling the service.
-# 3. Syncs Xorg configuration files from a specified source directory.
-# 4. Installs a custom XKB keyboard layout and updates evdev.xml to include the layout.
-# 5. Syncs a custom KBD keyboard layout to the appropriate directory.
-# 6. Logs rsync operations and reports any failures during execution.
-# 
+# This script sets up and synchronizes keyboard layouts, configuration files, 
+# and services for an Arch Linux system. It automates the following tasks:
+#
+# 1. Ensures the script is run with root privileges and required tools are installed.
+# 2. Configures the keyd service:
+#    - Installs keyd if missing.
+#    - Links the keyd configuration file from the specified directory.
+#    - Enables the keyd systemd service.
+# 3. Synchronizes Xorg configuration files to /etc/X11/xorg.conf.d/.
+# 4. Installs a custom XKB keyboard layout:
+#    - Copies the layout file to the appropriate directory.
+#    - Updates the evdev.xml file to register the new layout.
+#    - Sets the custom layout as the default in /etc/environment.
+# 5. Synchronizes a custom KBD keyboard layout to /usr/share/kbd/keymaps/.
+# 6. Synchronizes the vconsole.conf file:
+#    - Copies the configuration file from the source directory to /etc/vconsole.conf.
+# 7. Logs rsync operations for all file synchronization steps and reports any failures.
+#
 # Usage:
 #   ./script_name.sh <utono_directory_path>
-# 
+#
 # Arguments:
-#   <utono_directory_path> - Path to the directory containing the necessary configuration files.
-# 
+#   <utono_directory_path> - Path to the directory containing configuration files
+#                            (e.g., keyd, Xorg, XKB, and KBD layouts).
+#
 # Requirements:
 #   - Must be run as root.
 #   - Requires the 'rsync' and 'keyd' utilities to be installed.
-#   - Relies on specific directory and file structures in the provided utono_directory_path.
+#   - Assumes a specific directory structure within the provided path.
+#
+# Notes:
+#   - Backup operations are performed for evdev.xml and environment files before changes.
+#   - The script attempts to recover from errors by logging failed operations.
 
 set -uo pipefail
 
