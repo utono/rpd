@@ -11,17 +11,16 @@ exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "Starting script at $(date)"
 
-# Ensure the script is run as root
-if [ "$EUID" -ne 0 ]; then
-    echo "This script must be run as root. Exiting."
-    exit 1
-fi
-
-# Ensure required commands are available
-if ! command -v rsync &> /dev/null; then
-    echo "Required command (rsync) is missing. Install it and re-run the script."
-    exit 1
-fi
+# Validate required dependencies
+validate_dependencies() {
+    local required_tools=("rsync" "pacman" "localectl" "systemctl")
+    for tool in "${required_tools[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            echo "Required tool '$tool' is missing. Install it and re-run the script."
+            exit 1
+        fi
+    done
+}
 
 # Validate the input path
 validate_path() {
@@ -39,10 +38,10 @@ validate_path() {
     echo "Path validation successful: $path"
 }
 
-# Backup a file with a timestamp
+# Backup a file with a timestamp and unique identifier
 backup_file() {
     local src="$1"
-    local dest="${1}.bak.$(date +%Y%m%d%H%M%S)"
+    local dest="${1}.bak.$(date +%Y%m%d%H%M%S)_$$"
     if cp "$src" "$dest"; then
         echo "Backup created: $src -> $dest" >> "$LOGFILE"
     else
@@ -50,45 +49,50 @@ backup_file() {
     fi
 }
 
-# Rsync operation logging
-log_rsync() {
-    local src="$1"
-    local dest="$2"
-    echo "Synced: $src -> $dest"
+# Log messages with a consistent format
+log_message() {
+    local level="$1"
+    local message="$2"
+    echo "[$level] $message" | tee -a "$LOGFILE"
 }
 
-log_rsync_failure() {
-    local src="$1"
-    local dest="$2"
-    echo "FAILED: $src -> $dest"
-}
-
-# Sync Xorg configuration
-sync_xorg_conf() {
+# Sync custom KBD keyboard layout
+sync_kbd_keymap() {
     local path="$1"
+    local src="${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
+    local dest="/usr/share/kbd/keymaps/i386/dvorak/"
 
-    if [ ! -d /etc/X11/xorg.conf.d ]; then
-        echo "The directory /etc/X11/xorg.conf.d does not exist. Please install xorg-xserver."
-        return
-    fi
-
-    if [ -d "${path}/xorg.conf.d/etc/X11/xorg.conf.d" ]; then
-        rsync -a --chown=root:root "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/ || log_rsync_failure "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
-        log_rsync "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+    if [ -f "$src" ]; then
+        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
     else
-        echo "[SKIPPED] Xorg configuration source directory does not exist."
+        log_message "SKIPPED" "$src does not exist."
+    fi
+}
+
+# Sync vconsole.conf
+sync_vconsole_conf() {
+    local path="$1"
+    local src="${path}/etc/vconsole.conf"
+    local dest="/etc/vconsole.conf"
+
+    if [ -f "$src" ]; then
+        backup_file "$dest"
+        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
+    else
+        log_message "SKIPPED" "$src does not exist."
     fi
 }
 
 # Sync custom XKB keyboard layout
 sync_xkb_layout() {
     local path="$1"
+    local src="${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
+    local dest="/usr/share/X11/xkb/symbols/"
 
-    if [ -f "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" ]; then
-        rsync -a --chown=root:root "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" /usr/share/X11/xkb/symbols/ || log_rsync_failure "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
-        log_rsync "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
+    if [ -f "$src" ]; then
+        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
     else
-        echo "[SKIPPED] real_prog_dvorak source file does not exist."
+        log_message "SKIPPED" "$src does not exist."
     fi
 }
 
@@ -99,19 +103,25 @@ add_custom_layout_to_evdev() {
     local desc="Real Programmer's Dvorak"
     local evdev_path="/usr/share/X11/xkb/rules/evdev.xml"
 
-    backup_file "$evdev_path"
-
-    if ! grep -q "<name>${layout_name}</name>" "$evdev_path"; then
-        sed -i "/<layoutList>/a \        <layout>\
-            <configItem>\
-                <name>${layout_name}</name>\
-                <shortDescription>${short_desc}</shortDescription>\
-                <description>${desc}</description>\
-                <languageList>\
-                    <iso639Id>eng</iso639Id>\
-                </languageList>\
-            </configItem>\
-        </layout>" "$evdev_path"
+    if [ -f "$evdev_path" ]; then
+        backup_file "$evdev_path"
+        if ! grep -q "<name>${layout_name}</name>" "$evdev_path"; then
+            sed -i "/<layoutList>/a \        <layout>\
+                <configItem>\
+                    <name>${layout_name}</name>\
+                    <shortDescription>${short_desc}</shortDescription>\
+                    <description>${desc}</description>\
+                    <languageList>\
+                        <iso639Id>eng</iso639Id>\
+                    </languageList>\
+                </configItem>\
+            </layout>" "$evdev_path"
+            log_message "INFO" "Added $layout_name to $evdev_path"
+        else
+            log_message "SKIPPED" "$layout_name already exists in $evdev_path."
+        fi
+    else
+        log_message "ERROR" "$evdev_path does not exist."
     fi
 }
 
@@ -120,10 +130,15 @@ update_base_lst() {
     local layout_name="real_prog_dvorak"
     local base_lst_path="/usr/share/X11/xkb/rules/base.lst"
 
-    backup_file "$base_lst_path"
-
-    if ! grep -q "$layout_name" "$base_lst_path"; then
-        sed -i "/! layout/a \  $layout_name\t\tReal Programmer's Dvorak" "$base_lst_path"
+    if [ -f "$base_lst_path" ]; then
+        backup_file "$base_lst_path"
+        if ! grep -q "$layout_name" "$base_lst_path"; then
+            sed -i "/! layout/a \  $layout_name\t\tReal Programmer's Dvorak" "$base_lst_path" && log_message "INFO" "Added $layout_name to $base_lst_path" || log_message "ERROR" "Failed to add $layout_name to $base_lst_path."
+        else
+            log_message "SKIPPED" "$layout_name already exists in $base_lst_path."
+        fi
+    else
+        log_message "ERROR" "$base_lst_path does not exist."
     fi
 }
 
@@ -134,46 +149,44 @@ add_custom_layout_to_base_xml() {
     local desc="Real Programmer's Dvorak"
     local base_xml_path="/usr/share/X11/xkb/rules/base.xml"
 
-    backup_file "$base_xml_path"
-
-    if ! grep -q "<name>${layout_name}</name>" "$base_xml_path"; then
-        sed -i "/<layoutList>/a \        <layout>\
-            <configItem>\
-                <name>${layout_name}</name>\
-                <shortDescription>${short_desc}</shortDescription>\
-                <description>${desc}</description>\
-                <languageList>\
-                    <iso639Id>eng</iso639Id>\
-                </languageList>\
-            </configItem>\
-        </layout>" "$base_xml_path"
-    fi
-}
-
-# Sync custom KBD keyboard layout
-sync_kbd_keymap() {
-    local path="$1"
-
-    if [ -f "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" ]; then
-        rsync -a --chown=root:root "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" /usr/share/kbd/keymaps/i386/dvorak/ || log_rsync_failure "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
-        log_rsync "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
+    if [ -f "$base_xml_path" ]; then
+        backup_file "$base_xml_path"
+        if ! grep -q "<name>${layout_name}</name>" "$base_xml_path"; then
+            sed -i "/<layoutList>/a \        <layout>\
+                <configItem>\
+                    <name>${layout_name}</name>\
+                    <shortDescription>${short_desc}</shortDescription>\
+                    <description>${desc}</description>\
+                    <languageList>\
+                        <iso639Id>eng</iso639Id>\
+                    </languageList>\
+                </configItem>\
+            </layout>" "$base_xml_path"
+            log_message "INFO" "Added $layout_name to $base_xml_path"
+        else
+            log_message "SKIPPED" "$layout_name already exists in $base_xml_path."
+        fi
     else
-        echo "[SKIPPED] real_prog_dvorak.map.gz source file does not exist."
+        log_message "ERROR" "$base_xml_path does not exist."
     fi
 }
 
-# Sync vconsole.conf
-sync_vconsole_conf() {
-    local path="$1"
-
-    if [ -f "${path}/etc/vconsole.conf" ]; then
-        backup_file "/etc/vconsole.conf"
-        rsync -a --chown=root:root "${path}/etc/vconsole.conf" /etc/vconsole.conf || log_rsync_failure "${path}/etc/vconsole.conf" "/etc/vconsole.conf"
-        log_rsync "${path}/etc/vconsole.conf" "/etc/vconsole.conf"
-    else
-        echo "[SKIPPED] vconsole.conf source file does not exist."
-    fi
-}
+# Configure Wayland keyboard layout using localectl
+# configure_wayland_keyboard() {
+#     local layout="real_prog_dvorak"
+#     local variant=""
+#     local model="pc105"
+#
+#     if command -v localectl &> /dev/null; then
+#         if localectl set-keymap --no-convert "$layout" "$model" "$variant"; then
+#             log_message "INFO" "Wayland keyboard layout configured: layout=$layout, model=$model, variant=$variant"
+#         else
+#             log_message "ERROR" "Failed to configure Wayland keyboard layout."
+#         fi
+#     else
+#         log_message "ERROR" "localectl is not installed."
+#     fi
+# }
 
 # Configure Keyd service
 configure_keyd_service() {
@@ -188,12 +201,17 @@ configure_keyd_service() {
     mkdir -p /etc/keyd
     chmod 755 /etc/keyd
 
-    if [ -f "${path}/etc/keyd/default.conf" ]; then
-        ln -sf "${path}/etc/keyd/default.conf" /etc/keyd/default.conf
+    local src="${path}/etc/keyd/default.conf"
+    local dest="/etc/keyd/default.conf"
+
+    if [ -f "$src" ]; then
+        ln -sf "$src" "$dest" && log_message "INFO" "Linked $src -> $dest" || log_message "ERROR" "Failed to link $src -> $dest"
+    else
+        log_message "SKIPPED" "$src does not exist."
     fi
 
     if ! systemctl is-enabled keyd &> /dev/null; then
-        systemctl enable keyd
+        systemctl enable keyd && log_message "INFO" "Keyd service enabled" || log_message "ERROR" "Failed to enable Keyd service."
     fi
 }
 
@@ -201,7 +219,6 @@ configure_keyd_service() {
 report_summary() {
     echo "Script completed at $(date)"
     echo "The script has completed. For detailed logs, refer to the file: $LOGFILE"
-    echo "For Hyprland keyboard configuration, refer to the file: hyprland-keyboard-configuration.rst"
 }
 
 # Main logic
@@ -211,19 +228,39 @@ main() {
         exit 1
     fi
 
+    validate_dependencies
+
     local rpd_path="$1"
     validate_path "$rpd_path"
 
-    sync_xorg_conf "$rpd_path"
+    sync_kbd_keymap "$rpd_path"
+    sync_vconsole_conf "$rpd_path"
     sync_xkb_layout "$rpd_path"
     add_custom_layout_to_evdev
     update_base_lst
     add_custom_layout_to_base_xml
-    sync_kbd_keymap "$rpd_path"
-    sync_vconsole_conf "$rpd_path"
+    # configure_wayland_keyboard
     configure_keyd_service "$rpd_path"
 
     report_summary
 }
 
 main "$@"
+
+# # Sync Xorg configuration
+# sync_xorg_conf() {
+#     local path="$1"
+#
+#     if [ ! -d /etc/X11/xorg.conf.d ]; then
+#         echo "The directory /etc/X11/xorg.conf.d does not exist. Please install xorg-xserver."
+#         return
+#     fi
+#
+#     if [ -d "${path}/xorg.conf.d/etc/X11/xorg.conf.d" ]; then
+#         rsync -a --chown=root:root "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/ || log_rsync_failure "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+#         log_rsync "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+#     else
+#         echo "[SKIPPED] Xorg configuration source directory does not exist."
+#     fi
+# }
+
