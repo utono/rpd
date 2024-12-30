@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 # This script sets up and synchronizes keyboard layouts, configuration files, 
 # and services for an Arch Linux system. It automates the following tasks:
 #
@@ -11,6 +12,8 @@
 # 4. Installs a custom XKB keyboard layout:
 #    - Copies the layout file to the appropriate directory.
 #    - Updates the evdev.xml file to register the new layout.
+#    - Updates the base.lst file to include the new layout.
+#    - Updates the base.xml file to include the new layout (if required).
 #    - Sets the custom layout as the default in /etc/environment.
 # 5. Synchronizes a custom KBD keyboard layout to /usr/share/kbd/keymaps/.
 # 6. Synchronizes the vconsole.conf file:
@@ -30,7 +33,8 @@
 #   - Assumes a specific directory structure within the provided path.
 #
 # Notes:
-#   - Backup operations are performed for evdev.xml and environment files before changes.
+#   - Backup operations are performed for evdev.xml, base.lst, base.xml, and environment files 
+#     before changes.
 #   - The script attempts to recover from errors by logging failed operations.
 
 set -uo pipefail
@@ -151,6 +155,73 @@ add_custom_layout_to_evdev() {
     fi
 }
 
+# Function to update /usr/share/X11/xkb/rules/base.lst
+update_base_lst() {
+    local layout_name="real_prog_dvorak"
+    local base_lst_path="/usr/share/X11/xkb/rules/base.lst"
+
+    if [ -f "$base_lst_path" ]; then
+        cp "$base_lst_path" "${base_lst_path}.bak" || FAILED_COMMANDS+=("backup base.lst")
+    else
+        echo "The file $base_lst_path does not exist. Skipping update."
+        FAILED_COMMANDS+=("base.lst file missing")
+        return
+    fi
+
+    # Check if the layout is already present
+    if grep -q "$layout_name" "$base_lst_path"; then
+        echo "Custom layout '${layout_name}' is already listed in $base_lst_path."
+    else
+        echo "Adding custom layout '${layout_name}' to $base_lst_path..."
+        sed -i "/! layout/a \  $layout_name\t\tReal Programmer's Dvorak" "$base_lst_path"
+        if [ $? -eq 0 ]; then
+            echo "Successfully added '${layout_name}' to $base_lst_path."
+        else
+            echo "Failed to update $base_lst_path."
+            FAILED_COMMANDS+=("update base.lst")
+        fi
+    fi
+}
+
+# Function to add custom layout to base.xml
+add_custom_layout_to_base_xml() {
+    local layout_name="real_prog_dvorak"
+    local short_desc="RPD"
+    local desc="Real Programmer's Dvorak"
+    local base_xml_path="/usr/share/X11/xkb/rules/base.xml"
+
+    if [ -f "$base_xml_path" ]; then
+        cp "$base_xml_path" "${base_xml_path}.bak" || FAILED_COMMANDS+=("backup base.xml")
+    else
+        echo "The file $base_xml_path does not exist. Skipping update."
+        FAILED_COMMANDS+=("base.xml file missing")
+        return
+    fi
+
+    # Check if the layout is already present
+    if grep -q "<name>${layout_name}</name>" "$base_xml_path"; then
+        echo "Custom layout '${layout_name}' is already listed in $base_xml_path."
+    else
+        echo "Adding custom layout '${layout_name}' to $base_xml_path..."
+        sed -i "/<layoutList>/a \        <layout>\
+            <configItem>\
+                <name>${layout_name}</name>\
+                <shortDescription>${short_desc}</shortDescription>\
+                <description>${desc}</description>\
+                <languageList>\
+                    <iso639Id>eng</iso639Id>\
+                </languageList>\
+            </configItem>\
+        </layout>" "$base_xml_path"
+        if [ $? -eq 0 ]; then
+            echo "Successfully added '${layout_name}' to $base_xml_path."
+        else
+            echo "Failed to update $base_xml_path."
+            FAILED_COMMANDS+=("update base.xml")
+        fi
+    fi
+}
+
 # Function to sync custom KBD keyboard layout
 sync_kbd_keymap() {
     local utono_path="$1"
@@ -268,11 +339,26 @@ main() {
     sync_xorg_conf "$utono_path"
     sync_xkb_layout "$utono_path"
     add_custom_layout_to_evdev
+    update_base_lst
+    add_custom_layout_to_base_xml
     sync_kbd_keymap "$utono_path"
     sync_vconsole_conf "$utono_path"
     configure_keyd_service "$utono_path"
     report_rsync_operations
     report_failures
+
+    # Instruction for Hyprland configuration
+    echo -e "\n[INFO] To activate the custom layout in Hyprland, create the file ~/.config/hypr/config/user-config.conf with the following content:"
+    echo -e "\ninput {"
+    echo -e "    kb_layout = us,real_prog_dvorak"
+    echo -e "    kb_options = grp:alt_shift_toggle"
+    echo -e "}\n"
+    echo -e "Set 'kb_layout = us,real_prog_dvorak' if you want Hyprland to use the 'us' layout for binds."
+    echo -e "Even when 'real_prog_dvorak' is the active layout, the binds will function as if the active layout is 'us'."
+    echo -e "\nOnce configured, you can use the following command to switch between 'us' and 'real_prog_dvorak' layouts:"
+    echo -e "\nhyprctl switchxblayout all next\n"
+    echo -e "Additionally, it is recommended to add the following keybind to your keybinds.conf to make layout switching easier:"
+    echo -e "\nbind = $mainMod SHIFT, Tab, Switch xkb layout, exec, hyprctl switchxkblayout all next\n"
 }
 
 main "$@"
