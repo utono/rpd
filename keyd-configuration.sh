@@ -73,7 +73,7 @@ sync_xorg_conf() {
     fi
 
     if [ -d "${path}/xorg.conf.d/etc/X11/xorg.conf.d" ]; then
-        rsync -av --chown=root:root "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/ || log_rsync_failure "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+        rsync -a --chown=root:root "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/ || log_rsync_failure "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
         log_rsync "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
     else
         echo "[SKIPPED] Xorg configuration source directory does not exist."
@@ -87,7 +87,7 @@ sync_xkb_layout() {
     backup_file "/usr/share/X11/xkb/rules/evdev.xml" # Backup before making changes
 
     if [ -f "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" ]; then
-        rsync -av --chown=root:root "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" /usr/share/X11/xkb/symbols/ || log_rsync_failure "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
+        rsync -a --chown=root:root "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" /usr/share/X11/xkb/symbols/ || log_rsync_failure "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
         log_rsync "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
     else
         echo "[SKIPPED] real_prog_dvorak source file does not exist."
@@ -157,7 +157,7 @@ sync_kbd_keymap() {
     local path="$1"
 
     if [ -f "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" ]; then
-        rsync -av --chown=root:root "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" /usr/share/kbd/keymaps/i386/dvorak/ || log_rsync_failure "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
+        rsync -a --chown=root:root "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" /usr/share/kbd/keymaps/i386/dvorak/ || log_rsync_failure "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
         log_rsync "${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
     else
         echo "[SKIPPED] real_prog_dvorak.map.gz source file does not exist."
@@ -170,7 +170,7 @@ sync_vconsole_conf() {
 
     if [ -f "${path}/etc/vconsole.conf" ]; then
         backup_file "/etc/vconsole.conf"
-        rsync -av --chown=root:root "${path}/etc/vconsole.conf" /etc/vconsole.conf || log_rsync_failure "${path}/etc/vconsole.conf" "/etc/vconsole.conf"
+        rsync -a --chown=root:root "${path}/etc/vconsole.conf" /etc/vconsole.conf || log_rsync_failure "${path}/etc/vconsole.conf" "/etc/vconsole.conf"
         log_rsync "${path}/etc/vconsole.conf" "/etc/vconsole.conf"
     else
         echo "[SKIPPED] vconsole.conf source file does not exist."
