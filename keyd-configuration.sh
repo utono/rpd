@@ -12,9 +12,6 @@ if ! command -v rsync &> /dev/null; then
     exit 1
 fi
 
-# Validate and set `mainMod`
-mainMod="${mainMod:-mod4}" # Default to `mod4` if not set
-
 # Ensure a full path to the rpd directory is provided
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <rpd_directory_path>"
@@ -56,7 +53,110 @@ log_rsync_failure() {
     RSYNC_LOG+=("FAILED: $src -> $dest")
 }
 
-# Function definitions for all steps (same as provided)
+# Function to sync Xorg configuration
+sync_xorg_conf() {
+    if [ -d "$rpd_path/xorg.conf.d/etc/X11/xorg.conf.d" ]; then
+        rsync -av --chown=root:root "$rpd_path/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/
+        if [ $? -eq 0 ]; then
+            log_rsync "$rpd_path/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+        else
+            log_rsync_failure "$rpd_path/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
+            FAILED_COMMANDS+=("rsync Xorg configuration")
+        fi
+    else
+        echo "[SKIPPED] Xorg configuration source directory does not exist."
+    fi
+}
+
+# Function to sync custom XKB keyboard layout
+sync_xkb_layout() {
+    if [ -f "$rpd_path/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" ]; then
+        rsync -av --chown=root:root "$rpd_path/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" /usr/share/X11/xkb/symbols/
+        if [ $? -eq 0 ]; then
+            log_rsync "$rpd_path/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
+        else
+            log_rsync_failure "$rpd_path/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
+            FAILED_COMMANDS+=("rsync real_prog_dvorak")
+        fi
+    else
+        echo "[SKIPPED] real_prog_dvorak source file does not exist."
+    fi
+}
+
+# Function to sync custom KBD keyboard layout
+sync_kbd_keymap() {
+    if [ -f "$rpd_path/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" ]; then
+        rsync -av --chown=root:root "$rpd_path/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" /usr/share/kbd/keymaps/i386/dvorak/
+        if [ $? -eq 0 ]; then
+            log_rsync "$rpd_path/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
+        else
+            log_rsync_failure "$rpd_path/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz" "/usr/share/kbd/keymaps/i386/dvorak/"
+            FAILED_COMMANDS+=("rsync real_prog_dvorak.map.gz")
+        fi
+    else
+        echo "[SKIPPED] real_prog_dvorak.map.gz source file does not exist."
+    fi
+}
+
+# Function to sync vconsole.conf
+sync_vconsole_conf() {
+    if [ -f "$rpd_path/etc/vconsole.conf" ]; then
+        rsync -av --chown=root:root "$rpd_path/etc/vconsole.conf" /etc/vconsole.conf
+        if [ $? -eq 0 ]; then
+            log_rsync "$rpd_path/etc/vconsole.conf" "/etc/vconsole.conf"
+        else
+            log_rsync_failure "$rpd_path/etc/vconsole.conf" "/etc/vconsole.conf"
+            FAILED_COMMANDS+=("rsync vconsole.conf")
+        fi
+    else
+        echo "[SKIPPED] vconsole.conf source file does not exist."
+    fi
+}
+
+# Function to configure keyd service
+configure_keyd_service() {
+    if ! command -v keyd &> /dev/null; then
+        echo "Keyd is not installed. Installing..."
+        pacman -Sy --noconfirm keyd || FAILED_COMMANDS+=("install keyd")
+    fi
+
+    mkdir -p /etc/keyd || FAILED_COMMANDS+=("mkdir /etc/keyd")
+    chmod 755 /etc/keyd
+
+    if [[ -f "$rpd_path/etc/keyd/default.conf" ]]; then
+        ln -sf "$rpd_path/etc/keyd/default.conf" /etc/keyd/default.conf || FAILED_COMMANDS+=("symlink keyd config")
+    else
+        echo "Keyd configuration file not found: $rpd_path/etc/keyd/default.conf"
+        FAILED_COMMANDS+=("missing keyd config")
+    fi
+
+    systemctl enable keyd || FAILED_COMMANDS+=("enable keyd")
+}
+
+# Report rsync operations
+report_rsync_operations() {
+    if [ ${#RSYNC_LOG[@]} -eq 0 ]; then
+        echo "No rsync operations were performed."
+    else
+        echo "Rsync operations performed:"
+        for operation in "${RSYNC_LOG[@]}"; do
+            echo "- $operation"
+        done
+    fi
+}
+
+# Report any failures
+report_failures() {
+    if [ ${#FAILED_COMMANDS[@]} -ne 0 ]; then
+        echo "The following commands failed:"
+        for cmd in "${FAILED_COMMANDS[@]}"; do
+            echo "- $cmd"
+        done
+        exit 1
+    else
+        echo "All commands completed successfully."
+    fi
+}
 
 # Main script logic
 main() {
@@ -82,7 +182,9 @@ main() {
     echo -e "\nOnce configured, you can use the following command to switch between 'us' and 'real_prog_dvorak' layouts:"
     echo -e "\nhyprctl switchxblayout all next\n"
     echo -e "Additionally, it is recommended to add the following keybind to your keybinds.conf to make layout switching easier:"
-    echo -e "\nbind = $mainMod SHIFT, Tab, Switch xkb layout, exec, hyprctl switchxkblayout all next\n"
+    echo -e "\nbind = mainMod SHIFT, Tab, Switch xkb layout, exec, hyprctl switchxkblayout all next\n"
 }
+
+main
 
 main
