@@ -199,6 +199,7 @@ configure_keyd_service() {
 report_summary() {
     echo "Script completed at $(date)"
     echo "The script has completed. For detailed logs, refer to the file: $LOGFILE"
+    echo "For Hyprland keyboard configuration, refer to the file: hyprland-keyboard-configuration.rst"
 }
 
 # Main logic
