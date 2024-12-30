@@ -84,8 +84,6 @@ sync_xorg_conf() {
 sync_xkb_layout() {
     local path="$1"
 
-    backup_file "/usr/share/X11/xkb/rules/evdev.xml" # Backup before making changes
-
     if [ -f "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" ]; then
         rsync -a --chown=root:root "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" /usr/share/X11/xkb/symbols/ || log_rsync_failure "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
         log_rsync "${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak" "/usr/share/X11/xkb/symbols/"
