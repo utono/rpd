@@ -58,27 +58,20 @@ fi
 
 rpd_path="$1"
 
-# Validate the provided rpd directory path
+# Validate the argument matches the required pattern
+if [[ ! "$rpd_path" =~ .*/utono/rpd$ ]]; then
+    echo "Invalid path. The argument must match the pattern */utono/rpd."
+    exit 1
+fi
+
+# Check if the directory exists
 if [ ! -d "$rpd_path" ]; then
-    echo "The provided path does not exist or is not a directory: $rpd_path"
+    echo "The directory does not exist: $rpd_path"
     exit 1
 fi
 
-# Ensure the rpd directory is located within a utono directory
-utono_dir=$(dirname "$rpd_path")
-if [ "$(basename "$utono_dir")" != "utono" ]; then
-    echo "The provided rpd directory must be located within a 'utono' directory."
-    exit 1
-fi
-
-# Validate required subdirectories in the rpd directory
-required_subdirs=("xorg.conf.d" "xkb" "kbd" "etc")
-for subdir in "${required_subdirs[@]}"; do
-    if [ ! -d "$rpd_path/$subdir" ]; then
-        echo "Missing required subdirectory: $subdir in $rpd_path"
-        exit 1
-    fi
-done
+# Output success
+echo "Path validation successful: $rpd_path"
 
 # Arrays to track failed commands and rsync operations
 FAILED_COMMANDS=()
