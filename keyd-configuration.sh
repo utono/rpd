@@ -198,6 +198,7 @@ configure_keyd_service() {
 # Report summary
 report_summary() {
     echo "Script completed at $(date)"
+    echo "The script has completed. For detailed logs, refer to the file: $LOGFILE"
 }
 
 # Main logic
