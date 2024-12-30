@@ -236,9 +236,9 @@ main() {
     sync_kbd_keymap "$rpd_path"
     sync_vconsole_conf "$rpd_path"
     sync_xkb_layout "$rpd_path"
-    add_custom_layout_to_evdev
-    update_base_lst
-    add_custom_layout_to_base_xml
+    # add_custom_layout_to_evdev
+    # update_base_lst
+    # add_custom_layout_to_base_xml
     # configure_wayland_keyboard
     configure_keyd_service "$rpd_path"
 
