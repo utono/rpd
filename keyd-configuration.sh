@@ -43,7 +43,11 @@ validate_path() {
 backup_file() {
     local src="$1"
     local dest="${1}.bak.$(date +%Y%m%d%H%M%S)"
-    cp "$src" "$dest" || echo "Failed to back up $src"
+    if cp "$src" "$dest"; then
+        echo "Backup created: $src -> $dest" >> "$LOGFILE"
+    else
+        echo "Failed to back up $src" >> "$LOGFILE"
+    fi
 }
 
 # Rsync operation logging
