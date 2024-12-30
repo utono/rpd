@@ -186,5 +186,3 @@ main() {
 }
 
 main
-
-main
