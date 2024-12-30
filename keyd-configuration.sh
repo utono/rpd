@@ -172,21 +172,21 @@ add_custom_layout_to_base_xml() {
 }
 
 # Configure Wayland keyboard layout using localectl
-# configure_wayland_keyboard() {
-#     local layout="real_prog_dvorak"
-#     local variant=""
-#     local model="pc105"
-#
-#     if command -v localectl &> /dev/null; then
-#         if localectl set-keymap --no-convert "$layout" "$model" "$variant"; then
-#             log_message "INFO" "Wayland keyboard layout configured: layout=$layout, model=$model, variant=$variant"
-#         else
-#             log_message "ERROR" "Failed to configure Wayland keyboard layout."
-#         fi
-#     else
-#         log_message "ERROR" "localectl is not installed."
-#     fi
-# }
+configure_wayland_keyboard() {
+    local layout="real_prog_dvorak"
+    local variant=""
+    local model="pc105"
+
+    if command -v localectl &> /dev/null; then
+        if localectl set-keymap --no-convert "$layout" "$model" "$variant"; then
+            log_message "INFO" "Wayland keyboard layout configured: layout=$layout, model=$model, variant=$variant"
+        else
+            log_message "ERROR" "Failed to configure Wayland keyboard layout."
+        fi
+    else
+        log_message "ERROR" "localectl is not installed."
+    fi
+}
 
 # Configure Keyd service
 configure_keyd_service() {
