@@ -1,6 +1,8 @@
 Hyprland Configuration Instructions
 ===================================
 
+      hyprctl switchxblayout all next
+
 To activate the custom layout in Hyprland, follow these steps:
 
 !!! As long as ~/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak 
