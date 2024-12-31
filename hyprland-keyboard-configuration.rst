@@ -3,6 +3,19 @@ Hyprland Configuration Instructions
 
 To activate the custom layout in Hyprland, follow these steps:
 
+!!! As long as ~/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak 
+!!! has been copied to /usr/share/X11/xkb/symbols,
+!!! Hyprland can make use of the layout.
+
+!!! It is unnecessary, for Hyprland, to update the following:
+!!! /usr/share/X11/xkb/rules/evdev.xml
+!!! /usr/share/X11/xkb/rules/base.lst
+!!! /usr/share/X11/xkb/rules/base.xml
+
+!!! Also unnecessary is:
+!!!
+!!! localectl set-keymap
+
 1. Create the configuration file:
    `~/.config/hypr/config/user-config.conf` with the following content:
 
