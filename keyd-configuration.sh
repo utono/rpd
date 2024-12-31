@@ -89,6 +89,7 @@ sync_xkb_layout() {
     local src="${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
     local dest="/usr/share/X11/xkb/symbols/"
 
+    mkdir -p "$dest"
     if [ -f "$src" ]; then
         rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
     else
