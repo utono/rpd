@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 
+# Usage: ./keyd-configuration.sh <path>
+# 
 # This script sets up and synchronizes keyboard layouts, configuration files, 
-# and services for an Arch Linux system.
+# and services for an Arch Linux system. The user must provide a single argument 
+# that resolves to an absolute path ending with 'utono/rpd'.
+# 
+# The script performs the following steps:
+# 1. Validates that required dependencies (rsync, pacman, localectl, systemctl) are installed.
+# 2. Verifies that the provided path is valid and exists.
+# 3. Synchronizes custom keyboard layouts for KBD and XKB.
+# 4. Updates vconsole.conf with the specified configuration.
+# 5. Configures and enables the Keyd service.
+# 
+# Logs are stored in the file 'keyd-configuration.log' in the current directory.
 
 set -uo pipefail
 
@@ -25,17 +37,26 @@ validate_dependencies() {
 # Validate the input path
 validate_path() {
     local path="$1"
-    if [[ ! "$path" =~ .*/utono/rpd$ ]]; then
-        echo "Invalid path. The argument must match the pattern */utono/rpd."
+    local expanded_path
+
+    # Resolve the absolute path
+    expanded_path=$(realpath "$path") || {
+        echo "Failed to resolve path: $path"
+        exit 1
+    }
+
+    if [[ ! "$expanded_path" =~ .*/utono/rpd$ ]]; then
+        echo "Invalid path. The argument must expand to a path ending with */utono/rpd."
         exit 1
     fi
 
-    if [ ! -d "$path" ]; then
-        echo "The directory does not exist: $path"
+    if [ ! -d "$expanded_path" ]; then
+        echo "The directory does not exist: $expanded_path"
         exit 1
     fi
 
-    echo "Path validation successful: $path"
+    echo "Path validation successful: $expanded_path"
+    echo "$expanded_path"
 }
 
 # Backup a file with a timestamp and unique identifier
@@ -139,8 +160,8 @@ main() {
 
     validate_dependencies
 
-    local rpd_path="$1"
-    validate_path "$rpd_path"
+    local rpd_path
+    rpd_path=$(validate_path "$1")
 
     sync_kbd_keymap "$rpd_path"
     sync_vconsole_conf "$rpd_path"
@@ -151,118 +172,3 @@ main() {
 }
 
 main "$@"
-
-    # add_custom_layout_to_evdev
-    # update_base_lst
-    # add_custom_layout_to_base_xml
-    # configure_wayland_keyboard
-    
-# # Sync Xorg configuration
-# sync_xorg_conf() {
-#     local path="$1"
-#
-#     if [ ! -d /etc/X11/xorg.conf.d ]; then
-#         echo "The directory /etc/X11/xorg.conf.d does not exist. Please install xorg-xserver."
-#         return
-#     fi
-#
-#     if [ -d "${path}/xorg.conf.d/etc/X11/xorg.conf.d" ]; then
-#         rsync -a --chown=root:root "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" /etc/X11/xorg.conf.d/ || log_rsync_failure "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
-#         log_rsync "${path}/xorg.conf.d/etc/X11/xorg.conf.d/" "/etc/X11/xorg.conf.d/"
-#     else
-#         echo "[SKIPPED] Xorg configuration source directory does not exist."
-#     fi
-# }
-
-# Add custom layout to evdev.xml
-# add_custom_layout_to_evdev() {
-#     local layout_name="real_prog_dvorak"
-#     local short_desc="RPD"
-#     local desc="Real Programmer's Dvorak"
-#     local evdev_path="/usr/share/X11/xkb/rules/evdev.xml"
-#
-#     if [ -f "$evdev_path" ]; then
-#         backup_file "$evdev_path"
-#         if ! grep -q "<name>${layout_name}</name>" "$evdev_path"; then
-#             sed -i "/<layoutList>/a \        <layout>\
-#                 <configItem>\
-#                     <name>${layout_name}</name>\
-#                     <shortDescription>${short_desc}</shortDescription>\
-#                     <description>${desc}</description>\
-#                     <languageList>\
-#                         <iso639Id>eng</iso639Id>\
-#                     </languageList>\
-#                 </configItem>\
-#             </layout>" "$evdev_path"
-#             log_message "INFO" "Added $layout_name to $evdev_path"
-#         else
-#             log_message "SKIPPED" "$layout_name already exists in $evdev_path."
-#         fi
-#     else
-#         log_message "ERROR" "$evdev_path does not exist."
-#     fi
-# }
-
-# Update /usr/share/X11/xkb/rules/base.lst
-# update_base_lst() {
-#     local layout_name="real_prog_dvorak"
-#     local base_lst_path="/usr/share/X11/xkb/rules/base.lst"
-#
-#     if [ -f "$base_lst_path" ]; then
-#         backup_file "$base_lst_path"
-#         if ! grep -q "$layout_name" "$base_lst_path"; then
-#             sed -i "/! layout/a \  $layout_name\t\tReal Programmer's Dvorak" "$base_lst_path" && log_message "INFO" "Added $layout_name to $base_lst_path" || log_message "ERROR" "Failed to add $layout_name to $base_lst_path."
-#         else
-#             log_message "SKIPPED" "$layout_name already exists in $base_lst_path."
-#         fi
-#     else
-#         log_message "ERROR" "$base_lst_path does not exist."
-#     fi
-# }
-
-# Add custom layout to base.xml
-# add_custom_layout_to_base_xml() {
-#     local layout_name="real_prog_dvorak"
-#     local short_desc="RPD"
-#     local desc="Real Programmer's Dvorak"
-#     local base_xml_path="/usr/share/X11/xkb/rules/base.xml"
-#
-#     if [ -f "$base_xml_path" ]; then
-#         backup_file "$base_xml_path"
-#         if ! grep -q "<name>${layout_name}</name>" "$base_xml_path"; then
-#             sed -i "/<layoutList>/a \        <layout>\
-#                 <configItem>\
-#                     <name>${layout_name}</name>\
-#                     <shortDescription>${short_desc}</shortDescription>\
-#                     <description>${desc}</description>\
-#                     <languageList>\
-#                         <iso639Id>eng</iso639Id>\
-#                     </languageList>\
-#                 </configItem>\
-#             </layout>" "$base_xml_path"
-#             log_message "INFO" "Added $layout_name to $base_xml_path"
-#         else
-#             log_message "SKIPPED" "$layout_name already exists in $base_xml_path."
-#         fi
-#     else
-#         log_message "ERROR" "$base_xml_path does not exist."
-#     fi
-# }
-
-# Configure Wayland keyboard layout using localectl
-# configure_wayland_keyboard() {
-#     local layout="real_prog_dvorak"
-#     local variant=""
-#     local model="pc105"
-#
-#     if command -v localectl &> /dev/null; then
-#         if localectl set-keymap --no-convert "$layout" "$model" "$variant"; then
-#             log_message "INFO" "Wayland keyboard layout configured: layout=$layout, model=$model, variant=$variant"
-#         else
-#             log_message "ERROR" "Failed to configure Wayland keyboard layout."
-#         fi
-#     else
-#         log_message "ERROR" "localectl is not installed."
-#     fi
-# }
-
