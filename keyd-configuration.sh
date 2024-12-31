@@ -15,6 +15,7 @@
 # 
 # Logs are stored in the file 'keyd-configuration.log' in the current directory.
 
+
 set -uo pipefail
 
 # Initialize logging
@@ -37,26 +38,17 @@ validate_dependencies() {
 # Validate the input path
 validate_path() {
     local path="$1"
-    local expanded_path
-
-    # Resolve the absolute path
-    expanded_path=$(realpath "$path") || {
-        echo "Failed to resolve path: $path"
-        exit 1
-    }
-
-    if [[ ! "$expanded_path" =~ .*/utono/rpd$ ]]; then
-        echo "Invalid path. The argument must expand to a path ending with */utono/rpd."
+    if [[ ! "$path" =~ .*/utono/rpd$ ]]; then
+        echo "Invalid path. The argument must match the pattern */utono/rpd."
         exit 1
     fi
 
-    if [ ! -d "$expanded_path" ]; then
-        echo "The directory does not exist: $expanded_path"
+    if [ ! -d "$path" ]; then
+        echo "The directory does not exist: $path"
         exit 1
     fi
 
-    echo "Path validation successful: $expanded_path"
-    echo "$expanded_path"
+    echo "Path validation successful: $path"
 }
 
 # Backup a file with a timestamp and unique identifier
@@ -81,17 +73,6 @@ log_message() {
 sync_kbd_keymap() {
     local path="$1"
     local src="${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
-    local dest="/usr/share/kbd/keymaps/i386/dvorak/"
-
-    echo "Debug: Checking source file for KBD layout: $src"
-    ls -l "$src" || echo "Debug: Unable to list file details for $src"
-
-    if [ -f "$src" ]; then
-        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
-    else
-        log_message "SKIPPED" "$src does not exist."
-    fi
-}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
     local dest="/usr/share/kbd/keymaps/i386/dvorak/"
 
     if [ -f "$src" ]; then
@@ -119,18 +100,6 @@ sync_vconsole_conf() {
 sync_xkb_layout() {
     local path="$1"
     local src="${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
-    local dest="/usr/share/X11/xkb/symbols/"
-
-    mkdir -p "$dest"
-    echo "Debug: Checking source file for XKB layout: $src"
-    ls -l "$src" || echo "Debug: Unable to list file details for $src"
-
-    if [ -f "$src" ]; then
-        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
-    else
-        log_message "SKIPPED" "$src does not exist."
-    fi
-}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
     local dest="/usr/share/X11/xkb/symbols/"
 
     mkdir -p "$dest"
@@ -183,8 +152,8 @@ main() {
 
     validate_dependencies
 
-    local rpd_path
-    rpd_path=$(validate_path "$1")
+    local rpd_path="$1"
+    validate_path "$rpd_path"
 
     sync_kbd_keymap "$rpd_path"
     sync_vconsole_conf "$rpd_path"
