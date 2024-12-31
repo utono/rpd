@@ -83,6 +83,17 @@ sync_kbd_keymap() {
     local src="${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
     local dest="/usr/share/kbd/keymaps/i386/dvorak/"
 
+    echo "Debug: Checking source file for KBD layout: $src"
+    ls -l "$src" || echo "Debug: Unable to list file details for $src"
+
+    if [ -f "$src" ]; then
+        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
+    else
+        log_message "SKIPPED" "$src does not exist."
+    fi
+}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
+    local dest="/usr/share/kbd/keymaps/i386/dvorak/"
+
     if [ -f "$src" ]; then
         rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
     else
@@ -108,6 +119,18 @@ sync_vconsole_conf() {
 sync_xkb_layout() {
     local path="$1"
     local src="${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
+    local dest="/usr/share/X11/xkb/symbols/"
+
+    mkdir -p "$dest"
+    echo "Debug: Checking source file for XKB layout: $src"
+    ls -l "$src" || echo "Debug: Unable to list file details for $src"
+
+    if [ -f "$src" ]; then
+        rsync -a --chown=root:root "$src" "$dest" && log_message "INFO" "Synced $src -> $dest" || log_message "ERROR" "Failed to sync $src -> $dest"
+    else
+        log_message "SKIPPED" "$src does not exist."
+    fi
+}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
     local dest="/usr/share/X11/xkb/symbols/"
 
     mkdir -p "$dest"
