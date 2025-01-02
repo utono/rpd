@@ -26,7 +26,7 @@ echo "Starting script at $(date)"
 
 # Validate required dependencies
 validate_dependencies() {
-    local required_tools=("rsync" "pacman" "localectl" "systemctl")
+    local required_tools=("rsync")
     for tool in "${required_tools[@]}"; do
         if ! command -v "$tool" &> /dev/null; then
             echo "Required tool '$tool' is missing. Install it and re-run the script."
