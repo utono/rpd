@@ -1,0 +1,85 @@
+! real-prog-dvorak keymap created from ThePrimeagen
+keymaps 0-2,4-6,8-9,12
+alt_is_meta
+include "linux-with-two-alt-keys.inc"
+strings as usual
+! --------------------------------------------------------------------------
+! Row 1
+! --------------------------------------------------------------------------
+keycode   1 = Escape
+! --------------------------------------------------------------------------
+! Row 2
+! --------------------------------------------------------------------------
+keycode  41 = dollar         asciitilde
+keycode   2 = plus           one
+keycode   3 = bracketleft    two
+keycode   4 = braceleft      three
+keycode   5 = parenleft      four
+keycode   6 = ampersand      five
+keycode   7 = equal          six
+keycode   8 = parenright     seven
+keycode   9 = braceright     eight
+keycode  10 = bracketright   nine
+keycode  11 = asterisk       zero
+keycode  12 = exclam         percent
+keycode  13 = bar            grave
+keycode  14 = Delete
+! --------------------------------------------------------------------------
+! Row 3
+! --------------------------------------------------------------------------
+keycode  15 = Tab
+keycode  16 = semicolon      colon
+keycode  17 = comma          less
+keycode  18 = period         greater
+keycode  19 = p
+keycode  20 = y
+keycode  21 = f
+keycode  22 = g
+keycode  23 = c
+keycode  24 = r
+keycode  25 = l
+keycode  26 = slash          question
+keycode  27 = at             asciicircum
+keycode  28 = Return
+! --------------------------------------------------------------------------
+! Row 4
+! --------------------------------------------------------------------------
+keycode  58 = Escape
+keycode  30 = a
+keycode  31 = o
+keycode  32 = e
+keycode  33 = u
+keycode  34 = i
+keycode  35 = d
+keycode  36 = h
+keycode  37 = t
+keycode  38 = n
+keycode  39 = s
+keycode  40 = minus          underscore
+keycode  43 = backslash      numbersign
+! --------------------------------------------------------------------------
+! Row 5
+! --------------------------------------------------------------------------
+keycode  42 = Shift
+keycode  44 = apostrophe     quotedbl
+keycode  45 = q
+keycode  46 = j
+keycode  47 = k
+keycode  48 = x
+keycode  49 = b
+keycode  50 = m
+keycode  51 = w
+keycode  52 = v
+keycode  53 = z
+keycode  54 = Shift
+! --------------------------------------------------------------------------
+! Row 6
+! --------------------------------------------------------------------------
+keycode  29 = Control
+keycode  56 = Alt
+keycode  57 = space
+keycode  97 = Control
+! --------------------------------------------------------------------------
+! Disable Caps Lock
+! --------------------------------------------------------------------------
+keycode  58 = Escape
