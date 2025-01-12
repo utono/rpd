@@ -60,7 +60,7 @@ validate_path() {
 # Sync custom KBD keyboard layout
 sync_kbd_keymap() {
     local path="$1"
-    local src="${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz"
+    local src="${path}/kbd/usr/share/kbd/keymaps/i386/dvorak/rpd.map.gz"
     local dest="/usr/share/kbd/keymaps/i386/dvorak/"
 
     if [ -f "$src" ]; then
@@ -91,7 +91,7 @@ sync_vconsole_conf() {
 # Sync custom XKB keyboard layout
 sync_xkb_layout() {
     local path="$1"
-    local src="${path}/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak"
+    local src="${path}/xkb/usr/share/X11/xkb/symbols/rpd"
     local dest="/usr/share/X11/xkb/symbols/"
 
     if [ -f "$src" ]; then
@@ -115,7 +115,7 @@ post_sync_xkb_layout() {
     read -r response
     if [[ "$response" =~ ^[Yy]$ ]]; then
         hyprctl keyword input:kb_variant "" && \
-        hyprctl keyword input:kb_layout real_prog_dvorak && \
+        hyprctl keyword input:kb_layout rpd && \
         log_message "INFO" "Hyprland keyboard configuration applied." || \
         log_message "ERROR" "Failed to apply Hyprland keyboard configuration."
     else
