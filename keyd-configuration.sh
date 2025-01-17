@@ -6,15 +6,6 @@
 # This script sets up and synchronizes keyboard layouts, configuration files, 
 # and services for an Arch Linux system. The user must provide a single argument 
 # that resolves to an absolute path ending with 'utono/rpd'.
-# 
-# The script performs the following steps:
-# 1. Verifies that the provided path is valid and exists.
-# 2. Synchronizes custom keyboard layouts for KBD and XKB.
-# 3. Updates vconsole.conf with the specified configuration.
-# 4. Configures and enables the Keyd service.
-# 5. Optionally executes Hyprland keyboard configuration commands after syncing XKB layout.
-# 
-# Logs are stored in a writable directory, either in the current directory or in $HOME.
 
 set -uo pipefail
 set -e
@@ -72,20 +63,11 @@ sync_kbd_keymap() {
     fi
 }
 
-# Sync vconsole.conf
-sync_vconsole_conf() {
-    local path="$1"
-    local src="${path}/etc/vconsole.conf"
-    local dest="/etc/vconsole.conf"
-
-    if [ -f "$src" ]; then
-        sudo rm -f "$dest"
-        log_message "INFO" "Removed existing $dest"
-        sudo cp "$src" "$dest"
-        log_message "INFO" "Copied $src -> $dest"
-    else
-        log_message "SKIPPED" "$src does not exist."
-    fi
+# Configure vconsole keymap
+configure_vconsole_keymap() {
+    sudo localectl set-keymap real_prog_dvorak && \
+    log_message "INFO" "Set vconsole keymap to real_prog_dvorak" || \
+    log_message "ERROR" "Failed to set vconsole keymap"
 }
 
 # Sync custom XKB keyboard layout
@@ -161,6 +143,12 @@ configure_keyd_service() {
 report_summary() {
     echo "Script completed at $(date)"
     echo "The script has completed. For detailed logs, refer to the file: $LOGFILE"
+    echo
+    echo "IMPORTANT: You may need to regenerate your initramfs for the new vconsole settings to take effect during early boot."
+    echo "Run the following command as root:"
+    echo "  sudo mkinitcpio -P"
+    echo
+    echo "This ensures that the updated keyboard layout is available during the initramfs stage, especially if your system prompts for a password during boot (e.g., for LUKS encryption)."
 }
 
 # Main logic
@@ -174,7 +162,7 @@ main() {
     validate_path "$rpd_path"
 
     sync_kbd_keymap "$rpd_path"
-    sync_vconsole_conf "$rpd_path"
+    configure_vconsole_keymap
     sync_xkb_layout "$rpd_path"
     configure_keyd_service "$rpd_path"
 
