@@ -65,9 +65,24 @@ sync_kbd_keymap() {
 
 # Configure vconsole keymap
 configure_vconsole_keymap() {
-    sudo localectl set-keymap real_prog_dvorak && \
-    log_message "INFO" "Set vconsole keymap to real_prog_dvorak" || \
-    log_message "ERROR" "Failed to set vconsole keymap"
+    local vconsole_conf="/etc/vconsole.conf"
+    local backup_dir="$HOME/backups/etc"
+    
+    sudo mkdir -p "$backup_dir"
+
+    if [ -f "$vconsole_conf" ]; then
+        sudo cp "$vconsole_conf" "$backup_dir/vconsole.conf"
+        log_message "INFO" "Backed up existing vconsole.conf to $backup_dir/vconsole.conf"
+    else
+        log_message "INFO" "No existing vconsole.conf found to back up."
+    fi
+
+    sudo tee "$vconsole_conf" > /dev/null <<EOF
+# Written by systemd-localed(8) or systemd-firstboot(1), read by systemd-localed
+# and systemd-vconsole-setup(8). Use localectl(1) to update this file.
+KEYMAP=real_prog_dvorak
+EOF
+    log_message "INFO" "Updated vconsole.conf with KEYMAP=real_prog_dvorak"
 }
 
 # Sync custom XKB keyboard layout
