@@ -68,7 +68,7 @@ configure_vconsole_keymap() {
     local vconsole_conf="/etc/vconsole.conf"
     local backup_dir="$HOME/backups/etc"
     
-    sudo mkdir -p "$backup_dir"
+    mkdir -p "$backup_dir"
 
     if [ -f "$vconsole_conf" ]; then
         sudo cp "$vconsole_conf" "$backup_dir/vconsole.conf"
