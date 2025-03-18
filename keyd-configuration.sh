@@ -6,6 +6,15 @@
 # This script sets up and synchronizes keyboard layouts, configuration files, 
 # and services for an Arch Linux system. The user must provide a single argument 
 # that resolves to an absolute path ending with 'utono/rpd'.
+#
+# Summary of file linking and copying operations (assuming the path is ~/utono/rpd):
+# - Uses `rsync -a --chown=root:root ~/utono/rpd/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz /usr/share/kbd/keymaps/i386/dvorak/` to copy the KBD keyboard layout.
+# - Uses `cp /etc/vconsole.conf ~/backups/etc/vconsole.conf` to back up the existing vconsole configuration.
+# - Uses `tee /etc/vconsole.conf` to overwrite vconsole.conf with the new keymap setting.
+# - Uses `rsync -a --chown=root:root ~/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak /usr/share/X11/xkb/symbols/` to copy the XKB keyboard layout.
+# - Uses `ln -sf ~/utono/rpd/etc/keyd/default.conf /etc/keyd/default.conf` to create a symbolic link for the Keyd configuration.
+# - Uses `mkdir -p /usr/share/kbd/keymaps/i386/dvorak/`, `mkdir -p /usr/share/X11/xkb/symbols/`, and `mkdir -p /etc/keyd` to ensure directories exist before copying/linking.
+# - Uses `systemctl enable/start keyd` to manage the Keyd service.
 
 set -uo pipefail
 set -e
