@@ -1,1 +1,5 @@
 keyd-configuration.log
+
+# Claude Code - ignore all except commands
+.claude/*
+!.claude/commands/
