@@ -1,3 +1,9 @@
+---
+name: keyd
+description: Report and modify keyd lettermod timeout values
+argument-hint: report | set <key> <tap> <hold>
+---
+
 # Keyd Settings
 
 Manage lettermod timeout values in `etc/keyd/default.conf`.
@@ -11,8 +17,8 @@ Parse `$ARGUMENTS` and route:
 - **No arguments (empty):** Show usage:
   ```
   Usage:
-    /rpd keyd report                 - show lettermod timeout values
-    /rpd keyd set <key> <tap> <hold> - change timeout for a key
+    /rpd:keyd report                 - show lettermod timeout values
+    /rpd:keyd set <key> <tap> <hold> - change timeout for a key
 
   Keys: \ a s d f j k l ; space
   ```
@@ -23,6 +29,14 @@ Parse `$ARGUMENTS` and route:
   |-----|----------|----------|-----------|
 
   Use `spc` as the display name for the `space` key and `\` for `backslash`.
+
+  After the table, show usage:
+  ```
+  Usage:
+    /rpd:keyd set <key> <tap> <hold> - change timeout for a key
+
+  Keys: \ a s d f j k l ; space
+  ```
 
 - **`set <key> <tap> <hold>`:**
   1. Read `~/utono/rpd/etc/keyd/default.conf`
