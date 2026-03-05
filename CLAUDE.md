@@ -19,10 +19,12 @@ The system operates in layers that work together:
 
 The keyd config (`etc/keyd/default.conf`) has two layers:
 
-- **main**: Home row keys double as modifiers when held (a=shift, s=control, d=alt, f=meta on left; j=meta, k=alt, l=control, ;=shift on right). Capslock = tap for esc, hold for meta. Space = hold for meta. Insert toggles plain mode.
+- **main**: Home row keys double as modifiers when held (a=shift, s=control, d=alt, f=meta on left; j=meta, k=alt, l=control, ;=shift on right). Capslock = tap for esc, hold for meta. Space = hold for meta. Backslash = hold for meta. Insert toggles plain mode.
 - **plain**: Disables all home row mods, restoring normal typing. Capslock overload is preserved.
 
-The `lettermod(modifier, key, 100, 200)` parameters are tap/hold timing thresholds in milliseconds.
+The `lettermod(modifier, key, tap, hold)` parameters are timing thresholds in milliseconds. Index finger keys (f, j) use a shorter hold timeout (150ms) than other keys (200ms) to reduce accidental modifier activation.
+
+The `[ids]` section targets all keyboards (`*`) but excludes a specific gamepad (`-2dc8:9021`).
 
 ## Deployment
 
@@ -71,3 +73,16 @@ input {
 ```
 
 Toggle layouts with: `hyprctl switchxkblayout all next`
+
+## XKB Layout Details
+
+The RPD layout (`xkb/.../real_prog_dvorak`) differs from standard Dvorak primarily in the number row — unshifted keys produce programming symbols (`$+[{(&=)}]*!|#`), shifted keys produce digits. Additional differences from standard Dvorak:
+
+- `@` and `^` on `AD12` (where `=+` is on QWERTY)
+- `\` and `#` on `BKSL`
+- `/` and `?` on `AD11` (where `[{` is on QWERTY)
+
+## Slash Commands
+
+- `/rpd:keyd report` — display all lettermod timeout values from `etc/keyd/default.conf`
+- `/rpd:keyd set <key> <tap> <hold>` — change timeout for a key, then reload keyd
