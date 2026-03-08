@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-RPD (Real Programmers Dvorak) is a keyboard configuration repository for Arch Linux. It provides a custom Dvorak layout optimized for programming, deployed across multiple input layers: TTY console (KBD), X11/Wayland (XKB), and a key remapping daemon (keyd).
+RPD (Real Programmers Dvorak) is a keyboard configuration repository for Arch Linux. It provides a custom Dvorak layout optimized for programming, deployed across multiple input layers: TTY console (KBD), X11/Wayland (XKB), and a key remapping daemon (kanata).
 
 ## Architecture
 
@@ -12,50 +12,51 @@ The system operates in layers that work together:
 
 - **XKB layout** (`xkb/.../real_prog_dvorak`) defines the base Dvorak symbol mapping — number row has programming symbols (`$+[{(&=)}]*!|#`), letters follow Dvorak positioning
 - **KBD keymap** (`kbd/.../real_prog_dvorak.map.gz`) provides the same layout for TTY/virtual consoles
-- **Keyd config** (`etc/keyd/default.conf`) adds modifier behavior on top of the layout — home row mods, capslock overload, plain mode toggle
+- **Kanata config** (`etc/kanata/kanata.kbd`) adds modifier behavior on top of the layout — home row mods via `tap-hold-release`, capslock overload, plain mode toggle
 - **vconsole.conf** (`etc/vconsole.conf`) tells systemd to use the RPD keymap at boot
 
-### Keyd Layer Design
+### Kanata Layer Design
 
-The keyd config (`etc/keyd/default.conf`) has two layers:
+The kanata config (`etc/kanata/kanata.kbd`) has two layers:
 
-- **main**: Home row keys double as modifiers when held (a=shift, s=control, d=alt, f=meta on left; j=meta, k=alt, l=control, ;=shift on right). Capslock = tap for esc, hold for meta. Space = hold for meta. Backslash = hold for meta. Insert toggles plain mode.
+- **default**: Home row keys double as modifiers when held using `tap-hold-release` (a=shift, s=control, d=alt, f=meta on left; j=meta, k=alt, l=control, ;=shift on right). Capslock = tap for esc, hold for meta. Space = hold for meta. Backslash = hold for meta. Insert toggles plain mode.
 - **plain**: Disables all home row mods, restoring normal typing. Capslock overload is preserved.
 
-The `lettermod(modifier, key, tap, hold)` parameters are timing thresholds in milliseconds. Index finger keys (f, j) use a shorter hold timeout (150ms) than other keys (200ms) to reduce accidental modifier activation.
+Timing is controlled via `defvar`: `tap-time` (200ms), `hold-time` (200ms), and `index-hold-time` (150ms for f/j). The `tap-hold-release` algorithm only triggers a modifier when another key is pressed *and released* while holding, preventing accidental activation during fast typing.
 
-The `[ids]` section targets all keyboards (`*`) but excludes a specific gamepad (`-2dc8:9021`).
+Device targeting uses explicit paths in `defcfg` via `linux-dev`.
 
 ## Deployment
 
 The single setup script handles everything:
 
 ```bash
-./keyd-configuration.sh ~/utono/rpd
+./kanata-configuration.sh ~/utono/rpd
 ```
 
-This requires sudo and performs: KBD keymap copy, vconsole.conf update, XKB layout copy, keyd symlink creation (`/etc/keyd/default.conf` → source), keyd service enable/start. Optionally applies Hyprland config interactively.
+This requires sudo and performs: KBD keymap copy, vconsole.conf update, XKB layout copy, keyd sunset (stop/disable if running), kanata symlink creation (`/etc/kanata/kanata.kbd` → source), kanata service install/enable/start. Optionally applies Hyprland config interactively.
 
 After running, `sudo mkinitcpio -P` is recommended for early-boot keymap availability (LUKS).
 
-### Manual keyd operations
+### Manual kanata operations
 
 ```bash
-# Reload after editing default.conf
-sudo keyd reload
+# Restart after editing kanata.kbd
+sudo systemctl restart kanata
 
-# Check keyd is running
-sudo systemctl status keyd
+# Check kanata is running
+sudo systemctl status kanata
 
-# Monitor key events for debugging
-sudo keyd monitor
+# Validate config syntax
+kanata --check -c etc/kanata/kanata.kbd
 ```
 
 ## Key File Map
 
 | Source in repo | Deployed to | Method |
 |---|---|---|
-| `etc/keyd/default.conf` | `/etc/keyd/default.conf` | symlink |
+| `etc/kanata/kanata.kbd` | `/etc/kanata/kanata.kbd` | symlink |
+| `etc/kanata/kanata.service` | `/etc/systemd/system/kanata.service` | copy |
 | `kbd/.../real_prog_dvorak.map.gz` | `/usr/share/kbd/keymaps/i386/dvorak/` | rsync copy |
 | `xkb/.../real_prog_dvorak` | `/usr/share/X11/xkb/symbols/` | rsync copy |
 | `etc/vconsole.conf` | `/etc/vconsole.conf` | overwrite via tee |
@@ -84,5 +85,5 @@ The RPD layout (`xkb/.../real_prog_dvorak`) differs from standard Dvorak primari
 
 ## Slash Commands
 
-- `/rpd:keyd report` — display all lettermod timeout values from `etc/keyd/default.conf`
-- `/rpd:keyd set <key> <tap> <hold>` — change timeout for a key, then reload keyd
+- `/rpd:kanata report` — display tap-hold timeout values from `etc/kanata/kanata.kbd`
+- `/rpd:kanata set <var> <value>` — change a timeout variable, then restart kanata

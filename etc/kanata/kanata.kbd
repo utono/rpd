@@ -1,0 +1,43 @@
+(defcfg
+  linux-dev /dev/input/by-path/platform-i8042-serio-0-event-kbd
+  process-unmapped-keys yes
+)
+
+(defsrc
+  caps a s d f j k l ; spc bksl ins
+)
+
+(defvar
+  tap-time 200
+  hold-time 200
+  index-hold-time 150
+)
+
+(defalias
+  ;; Capslock: tap=esc, hold=meta
+  cec (tap-hold $tap-time $hold-time esc lmet)
+
+  ;; Left home row mods
+  a (tap-hold-release $tap-time $hold-time a lsft)
+  s (tap-hold-release $tap-time $hold-time s lctl)
+  d (tap-hold-release $tap-time $hold-time d lalt)
+  f (tap-hold-release $tap-time $index-hold-time f lmet)
+
+  ;; Right home row mods
+  j (tap-hold-release $tap-time $index-hold-time j rmet)
+  k (tap-hold-release $tap-time $hold-time k ralt)
+  l (tap-hold-release $tap-time $hold-time l rctl)
+  ; (tap-hold-release $tap-time $hold-time ; rsft)
+
+  ;; Thumb/other
+  spc (tap-hold-release $tap-time $hold-time spc lmet)
+  bksl (tap-hold-release $tap-time $hold-time bksl lmet)
+)
+
+(deflayer default
+  @cec @a @s @d @f @j @k @l @; @spc @bksl (layer-switch plain)
+)
+
+(deflayer plain
+  @cec a s d f j k l ; spc bksl (layer-switch default)
+)
