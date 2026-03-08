@@ -9,8 +9,8 @@
 
 (defvar
   tap-time 200
-  hold-time 200
-  index-hold-time 200
+  hold-time 280
+  index-hold-time 250
 )
 
 (defalias
@@ -18,16 +18,16 @@
   cec (tap-hold $tap-time $hold-time esc lmet)
 
   ;; Left home row mods
-  a (tap-hold-press $tap-time $hold-time a lsft)
-  s (tap-hold-press $tap-time $hold-time s lctl)
-  d (tap-hold-press $tap-time $hold-time d lalt)
-  f (tap-hold-press $tap-time $index-hold-time f lmet)
+  a (tap-hold-release $tap-time $hold-time a lsft)
+  s (tap-hold-release $tap-time $hold-time s lctl)
+  d (tap-hold-release $tap-time $hold-time d lalt)
+  f (tap-hold-release $tap-time $index-hold-time f lmet)
 
   ;; Right home row mods
-  j (tap-hold-press $tap-time $index-hold-time j rmet)
-  k (tap-hold-press $tap-time $hold-time k ralt)
-  l (tap-hold-press $tap-time $hold-time l rctl)
-  ; (tap-hold-press $tap-time $hold-time ; rsft)
+  j (tap-hold-release $tap-time $index-hold-time j rmet)
+  k (tap-hold-release $tap-time $hold-time k ralt)
+  l (tap-hold-release $tap-time $hold-time l rctl)
+  ; (tap-hold-release $tap-time $hold-time ; rsft)
 
   ;; Thumb/other
   spc (tap-hold-release $tap-time $hold-time spc lmet)
