@@ -92,28 +92,11 @@ sync_xkb_layout() {
         sudo mkdir -p "$dest"
         sudo rsync -a --chown=root:root "$src" "$dest"
         log_message "INFO" "Synced $src -> $dest"
-        post_sync_xkb_layout
     else
         log_message "SKIPPED" "$src does not exist."
     fi
 }
 
-post_sync_xkb_layout() {
-    if [ "$EUID" -eq 0 ]; then
-        log_message "INFO" "Hyprland configuration must be run as the user, not root. Skipping."
-        return
-    fi
-    echo "Do you want to apply Hyprland keyboard configuration? (y/N): "
-    read -r response
-    if [[ "$response" =~ ^[Yy]$ ]]; then
-        hyprctl keyword input:kb_variant "" && \
-        hyprctl keyword input:kb_layout real_prog_dvorak && \
-        log_message "INFO" "Hyprland keyboard configuration applied." || \
-        log_message "ERROR" "Failed to apply Hyprland keyboard configuration."
-    else
-        log_message "INFO" "Hyprland keyboard configuration skipped by user."
-    fi
-}
 
 sunset_keyd() {
     if systemctl is-active keyd &> /dev/null; then

@@ -34,7 +34,7 @@ The single setup script handles everything:
 ./kanata-configuration.sh ~/utono/rpd
 ```
 
-This requires sudo and performs: KBD keymap copy, vconsole.conf update, XKB layout copy, keyd sunset (stop/disable if running), kanata symlink creation (`/etc/kanata/kanata.kbd` → source), kanata service install/enable/start. Optionally applies Hyprland config interactively.
+This requires sudo and performs: KBD keymap copy, vconsole.conf update, XKB layout copy, keyd sunset (stop/disable if running), kanata symlink creation (`/etc/kanata/kanata.kbd` → source), kanata service install/enable/start.
 
 After running, `sudo mkinitcpio -P` is recommended for early-boot keymap availability (LUKS).
 
@@ -62,18 +62,9 @@ kanata --check -c etc/kanata/kanata.kbd
 | `etc/vconsole.conf` | `/etc/vconsole.conf` | overwrite via tee |
 | `xorg.conf.d/.../00-keyboard.conf` | `/etc/X11/xorg.conf.d/` | manual copy (X11 only) |
 
-## Hyprland Integration
+## dwl Integration
 
-The XKB layout works with Hyprland once copied to `/usr/share/X11/xkb/symbols/`. No modifications to evdev.xml or base.lst are needed. Configuration goes in Hyprland's input section:
-
-```
-input {
-    kb_layout = us,real_prog_dvorak
-    kb_options = grp:alt_shift_toggle
-}
-```
-
-Toggle layouts with: `hyprctl switchxkblayout all next`
+The XKB layout works with dwl once copied to `/usr/share/X11/xkb/symbols/`. No modifications to evdev.xml or base.lst are needed. dwl uses XKB directly via libxkbcommon, so the layout is available once deployed.
 
 ## XKB Layout Details
 
