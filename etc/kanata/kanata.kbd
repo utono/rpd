@@ -9,7 +9,7 @@
 
 (defvar
   tap-time 200
-  hold-time 280
+  hold-time 300
   index-hold-time 250
 )
 
