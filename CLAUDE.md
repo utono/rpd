@@ -78,3 +78,8 @@ The RPD layout (`xkb/.../real_prog_dvorak`) differs from standard Dvorak primari
 
 - `/rpd:kanata report` — display tap-hold timeout values from `etc/kanata/kanata.kbd`
 - `/rpd:kanata set <var> <value>` — change a timeout variable, then restart kanata
+- `/hammerspoon list` — show all current Hammerspoon keybindings
+- `/hammerspoon search <query>` — find a binding by description (e.g., "screenshot", "terminal")
+- `/hammerspoon change <binding>` — modify an existing binding
+- `/hammerspoon add <description>` — add a new keybinding
+- `/hammerspoon delete <binding>` — remove a keybinding
