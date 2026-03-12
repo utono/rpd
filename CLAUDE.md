@@ -74,12 +74,11 @@ The RPD layout (`xkb/.../real_prog_dvorak`) differs from standard Dvorak primari
 - `\` and `#` on `BKSL`
 - `/` and `?` on `AD11` (where `[{` is on QWERTY)
 
+## macOS Counterpart
+
+The macOS version lives at `~/utono/rpd-macos` and uses a `.keylayout` file for the layout and Kanata (with Karabiner's virtual HID driver) for home row mods. Hammerspoon keybindings also live there.
+
 ## Slash Commands
 
 - `/rpd:kanata report` — display tap-hold timeout values from `etc/kanata/kanata.kbd`
 - `/rpd:kanata set <var> <value>` — change a timeout variable, then restart kanata
-- `/hammerspoon list` — show all current Hammerspoon keybindings
-- `/hammerspoon search <query>` — find a binding by description (e.g., "screenshot", "terminal")
-- `/hammerspoon change <binding>` — modify an existing binding
-- `/hammerspoon add <description>` — add a new keybinding
-- `/hammerspoon delete <binding>` — remove a keybinding
