@@ -18,7 +18,7 @@
   cec (tap-hold $tap-time $hold-time esc lmet)
 
   ;; Left home row mods
-  a (tap-hold-release $tap-time 350 a lsft)
+  a (tap-hold-release $tap-time 150 a lsft)
   s (tap-hold-release $tap-time $hold-time s lctl)
   d (tap-hold-release $tap-time $hold-time d lalt)
   f (tap-hold-release $tap-time $index-hold-time f lmet)
