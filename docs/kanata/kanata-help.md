@@ -1,12 +1,44 @@
-# Kanata Features to Explore
+# Kanata Help
 
-Features to experiment with after the core migration from keyd is stable.
+## Home Row Mods — How Timing Affects Behavior
 
-## Mouse Emulation
+Home row keys double as modifiers using `tap-hold-release`. Three variables control timing:
+
+### tap-time
+
+The maximum time (ms) a key can be held before it becomes eligible for the hold action. If you press and release a key within tap-time and no other key was pressed during that window, it always registers as a tap. Lower values make taps snappier but require faster typing to avoid accidental holds.
+
+### hold-time
+
+The window (ms) in which another key must be **pressed and released** while the home row key is held down for the modifier to activate. With `tap-hold-release`, simply holding past hold-time does nothing — a second key must complete a full press-release cycle within that window.
+
+- **Higher hold-time** (e.g. 300-350ms) — more forgiving during fast typing; reduces accidental modifier triggers from key rolls. Intentional modifier use feels slightly slower.
+- **Lower hold-time** (e.g. 150-200ms) — modifiers activate faster for shortcuts, but fast typing rolls can accidentally trigger modifiers.
+
+### index-hold-time
+
+A separate hold-time applied only to the index finger keys (`f` and `j`). Typically set lower than hold-time because index fingers are used more deliberately for shortcuts and are less prone to accidental rolls with non-adjacent keys.
+
+### Algorithm: tap-hold-release
+
+The `tap-hold-release` algorithm requires another key to be **pressed and released** while the home row key is held. This is stricter than `tap-hold-press` (which triggers on press alone) and prevents most misfires from adjacent key rolls during fast typing.
+
+### Tuning Tips
+
+- If a home row key fires as a modifier during normal typing, **increase** its hold-time
+- If intentional modifier combos feel sluggish, **decrease** hold-time
+- Individual keys can use hardcoded values instead of the shared variable for per-key tuning
+- The `f` and `j` keys use `$index-hold-time` — adjust that variable separately
+
+---
+
+## Features to Explore
+
+### Mouse Emulation
 
 Control the mouse cursor from the keyboard via a dedicated layer.
 
-### Getting Started
+#### Getting Started
 
 Add a mouse layer activated by holding a key (e.g., right alt):
 
@@ -31,7 +63,7 @@ Kanata mouse actions:
 - `mlft` / `mrgt` / `mmid` — left, right, middle click
 - `(mwheel-up N T)` / `(mwheel-down N T)` — scroll wheel
 
-### Example Mouse Layer
+#### Example Mouse Layer
 
 ```lisp
 (defvar
@@ -61,7 +93,7 @@ Kanata mouse actions:
 
 Tune `$msp`, `$msi`, `$macc`, and `$mmax` to get the right cursor feel.
 
-## Tap-Dance
+### Tap-Dance
 
 Multi-tap keys — different actions based on how many times you tap.
 
@@ -79,7 +111,7 @@ Use cases:
 - `'` / `"` on a single key
 - Quick access to rarely-used symbols
 
-## Combos
+### Combos
 
 Press two keys simultaneously to produce a different output.
 
@@ -101,7 +133,7 @@ Use cases:
 - `d+f` = Tab
 - `s+d` = Escape (alternative to capslock)
 
-## One-Shot Modifiers
+### One-Shot Modifiers
 
 Tap a modifier key, and it applies to only the next keypress. No holding required.
 
@@ -114,7 +146,7 @@ Tap a modifier key, and it applies to only the next keypress. No holding require
 
 Useful for reducing finger strain — instead of holding shift+key, tap shift then tap key.
 
-## Per-Application Layers
+### Per-Application Layers
 
 Kanata itself doesn't detect the active application, but you can use external tools to switch layers:
 
@@ -124,7 +156,7 @@ Kanata itself doesn't detect the active application, but you can use external to
 
 This is advanced and requires external scripting beyond kanata's config.
 
-## Resources
+### Resources
 
 - Kanata docs: https://github.com/jtroo/kanata/blob/main/docs/config.adoc
 - Sample configs: https://github.com/jtroo/kanata/tree/main/cfg_samples
