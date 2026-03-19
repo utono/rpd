@@ -10,7 +10,7 @@
 (defvar
   tap-time 200
   hold-time 300
-  index-hold-time 250
+  index-hold-time 300
 )
 
 (defalias
@@ -24,7 +24,7 @@
   f (tap-hold-release $tap-time $index-hold-time f lmet)
 
   ;; Right home row mods
-  j (tap-hold-release $tap-time $index-hold-time j rmet)
+  j (tap-hold-release $tap-time 400 j rmet)
   k (tap-hold-release $tap-time $hold-time k ralt)
   l (tap-hold-release $tap-time $hold-time l rctl)
   ; (tap-hold-release $tap-time 250 ; rsft)
