@@ -19,14 +19,14 @@
 
   ;; Left home row mods
   a (tap-hold-release $tap-time 200 a lsft)
-  s (tap-hold-release $tap-time $hold-time s lctl)
+  s (tap-hold-release $tap-time 400 s lctl)
   d (tap-hold-release $tap-time $hold-time d lalt)
   f (tap-hold-release $tap-time 400 f lmet)
 
   ;; Right home row mods
   j (tap-hold-release $tap-time 400 j rmet)
   k (tap-hold-release $tap-time $hold-time k ralt)
-  l (tap-hold-release $tap-time $hold-time l rctl)
+  l (tap-hold-release $tap-time 400 l rctl)
   ; (tap-hold-release $tap-time 250 ; rsft)
 
   ;; Thumb/other
