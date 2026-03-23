@@ -21,7 +21,7 @@
   a (tap-hold-release $tap-time 200 a lsft)
   s (tap-hold-release $tap-time $hold-time s lctl)
   d (tap-hold-release $tap-time $hold-time d lalt)
-  f (tap-hold-release $tap-time $index-hold-time f lmet)
+  f (tap-hold-release $tap-time 400 f lmet)
 
   ;; Right home row mods
   j (tap-hold-release $tap-time 400 j rmet)
