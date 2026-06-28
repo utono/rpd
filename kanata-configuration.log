@@ -406,3 +406,25 @@ Run the following command as root:
   sudo mkinitcpio -P
 
 This ensures that the updated keyboard layout is available during the initramfs stage, especially if your system prompts for a password during boot (e.g., for LUKS encryption).
+Starting script at Sat Jun 27 10:18:47 PM CDT 2026
+Path validation successful: /home/mlj/utono/rpd
+[INFO] Synced /home/mlj/utono/rpd/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz -> /usr/share/kbd/keymaps/i386/dvorak/
+[INFO] Synced /home/mlj/utono/rpd/kbd/usr/share/kbd/keymaps/i386/dvorak/real_prog_dvorak.map.gz -> /usr/share/kbd/keymaps/i386/dvorak/
+[INFO] Backed up existing vconsole.conf to /home/mlj/backups/etc/vconsole.conf
+[INFO] Backed up existing vconsole.conf to /home/mlj/backups/etc/vconsole.conf
+[INFO] Updated vconsole.conf with KEYMAP=real_prog_dvorak
+[INFO] Updated vconsole.conf with KEYMAP=real_prog_dvorak
+[INFO] Synced /home/mlj/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak -> /usr/share/X11/xkb/symbols/
+[INFO] Synced /home/mlj/utono/rpd/xkb/usr/share/X11/xkb/symbols/real_prog_dvorak -> /usr/share/X11/xkb/symbols/
+[INFO] Linked /home/mlj/utono/rpd/etc/kanata/kanata.kbd -> /etc/kanata/kanata.kbd
+[INFO] Linked /home/mlj/utono/rpd/etc/kanata/kanata.kbd -> /etc/kanata/kanata.kbd
+[INFO] Installed kanata.service to /etc/systemd/system/kanata.service
+[INFO] Installed kanata.service to /etc/systemd/system/kanata.service
+Script completed at Sat Jun 27 10:18:50 PM CDT 2026
+The script has completed. For detailed logs, refer to the file: /home/mlj/utono/rpd/kanata-configuration.log
+
+IMPORTANT: You may need to regenerate your initramfs for the new vconsole settings to take effect during early boot.
+Run the following command as root:
+  sudo mkinitcpio -P
+
+This ensures that the updated keyboard layout is available during the initramfs stage, especially if your system prompts for a password during boot (e.g., for LUKS encryption).

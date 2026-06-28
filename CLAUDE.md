@@ -38,6 +38,30 @@ This requires sudo and performs: KBD keymap copy, vconsole.conf update, XKB layo
 
 After running, `sudo mkinitcpio -P` is recommended for early-boot keymap availability (LUKS).
 
+### Recovery after a system upgrade reverts the keymap
+
+A `paru -Syu` / `pacman -Syu` that upgrades systemd runs `systemd-localed`,
+which rewrites `/etc/vconsole.conf` back to the `us` default (`KEYMAP=us`,
+adding `XKBLAYOUT=us`). The TTY then reverts to QWERTY. The deployed layout
+files, the XKB symbols, and the kanata service all survive — only the keymap
+*selection* reverts.
+
+To recover, re-run the setup script — its `configure_vconsole_keymap()` step
+backs up the clobbered `vconsole.conf` to `~/backups/etc/` and rewrites it with
+`KEYMAP=real_prog_dvorak`:
+
+```bash
+./kanata-configuration.sh ~/utono/rpd
+sudo loadkeys real_prog_dvorak   # apply to the live TTY immediately
+```
+
+The script does **not** touch the X11 layer (`localectl` / `00-keyboard.conf`),
+but that is fine: dwl (Wayland) sets `real_prog_dvorak` itself via libxkbcommon
+and does not read `00-keyboard.conf`. Only fix the X11 side for a literal Xorg
+session: `sudo localectl set-x11-keymap real_prog_dvorak`.
+
+See `CLAUDE-troubleshooting.md` for the full diagnosis.
+
 ### Manual kanata operations
 
 ```bash
