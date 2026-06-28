@@ -82,3 +82,17 @@ The macOS version lives at `~/utono/rpd-macos` and uses a `.keylayout` file for 
 
 - `/rpd:kanata report` — display tap-hold timeout values from `etc/kanata/kanata.kbd`
 - `/rpd:kanata set <var> <value>` — change a timeout variable, then restart kanata
+
+## Memory Bank System
+
+This project uses a structured memory bank system. Always check these context
+files before starting work, and keep them updated as the project evolves:
+
+- **CLAUDE-activeContext.md** — current session state, goals, and progress
+- **CLAUDE-patterns.md** — established code patterns and conventions
+- **CLAUDE-decisions.md** — architecture decisions and rationale
+- **CLAUDE-troubleshooting.md** — common issues and proven solutions
+- **CLAUDE-config-variables.md** — configuration variables reference
+
+Always read **CLAUDE-activeContext.md** first to maintain session continuity.
+When you change core context, update the relevant memory bank file.
