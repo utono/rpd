@@ -98,6 +98,39 @@ The RPD layout (`xkb/.../real_prog_dvorak`) differs from standard Dvorak primari
 - `\` and `#` on `BKSL`
 - `/` and `?` on `AD11` (where `[{` is on QWERTY)
 
+### Consequences for keybinding advice
+
+Every consumer config binds by the **character RPD produces**, not the QWERTY
+position. Never assume a US QWERTY position when reasoning about a binding:
+
+- **Digits need Shift.** A binding on "1" is physically `Shift+1`; the
+  unshifted key there is `+`.
+- **`-` and `_` moved to the QWERTY apostrophe key**; the QWERTY `-` key is
+  now `!`/`%`.
+- **`/` and `?` are on the QWERTY `[` key.** Relevant to any `?`-for-help
+  binding — e.g. herdr's `prefix+?` is `ctrl+b` then `Shift+[` (physical).
+- **Vim `hjkl` is scattered**: `h`=QWERTY `J`, `j`=QWERTY `C`, `k`=QWERTY `V`,
+  `l`=QWERTY `P`. Not adjacent, so "hjkl is ergonomic" does not hold here.
+  Conversely `htns` (QWERTY `jkl;`) IS the right home row run.
+- **`ctrl+a` is not a home-row-pinky reach.** `a` stays on the QWERTY `A` key,
+  but the usual QWERTY ergonomic argument for `ctrl+a` prefixes doesn't transfer.
+- Ergonomic claims from upstream docs assume QWERTY — re-derive before
+  repeating them.
+
+**Kanata's `defsrc` is the exception**: it names **physical QWERTY positions**,
+so the aliases written `a s d f j k l ;` sit on the keys RPD types as `a o e u`
+and `h t n s`. Mixing this up with the XKB side is the classic error.
+
+Confirmed consumers, all outside this repo — verified 2026-08-06:
+
+- `~/utono/mangowm-mlj/.config/mango/cfg/keybinds.conf` — RPD keysym names
+  (`plus`, `bracketleft`, `braceleft` … for tags 1-3). Must use `binds=`, not
+  `bind=`; see that repo's `docs/troubleshooting/keysym-verification.md`.
+- `~/utono/linux-lit/src/input/keymap.rs` — GTK `keyval.name()` /
+  `keyval.to_unicode()`, layout-aware; the hardware keycode is discarded.
+- `~/.config/mpv/input.conf` — RPD characters, organized in
+  unshifted/shifted pairs per physical key (`$`/`~`, `+`/`1`, `(`/`4` …).
+
 ## macOS Counterpart
 
 The macOS version lives at `~/utono/rpd-macos` and uses a `.keylayout` file for the layout and Kanata (with Karabiner's virtual HID driver) for home row mods. Hammerspoon keybindings also live there.
