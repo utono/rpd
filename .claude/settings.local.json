@@ -1,0 +1,11 @@
+{
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
+  },
+  "permissions": {
+    "allow": [
+      "Edit(.claude/**)"
+    ],
+    "defaultMode": "bypassPermissions"
+  }
+}
