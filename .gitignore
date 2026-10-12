@@ -1,7 +1,5 @@
 keyd-configuration.log
 
-# Claude Code - ignore session cruft, but track reusable commands and skills
-.claude/*
-!.claude/commands/
-!.claude/skills/
+# Claude Code worktrees
+.claude/worktrees/
 CLAUDE-activeContext.md
