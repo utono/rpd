@@ -130,6 +130,17 @@ configure_kanata_service() {
         exit 1
     fi
 
+    local launch_src="${path}/bin/kanata-launch"
+    local launch_dest="/usr/local/bin/kanata-launch"
+    if [ -f "$launch_src" ]; then
+        sudo chmod +x "$launch_src"
+        sudo ln -sf "$launch_src" "$launch_dest"
+        log_message "INFO" "Linked $launch_src -> $launch_dest"
+    else
+        log_message "ERROR" "$launch_src does not exist."
+        exit 1
+    fi
+
     local service_src="${path}/etc/kanata/kanata.service"
     local service_dest="/etc/systemd/system/kanata.service"
     if [ -f "$service_src" ]; then

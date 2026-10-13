@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Write the kanata config for this machine, then exec kanata.
+# The tracked kanata.kbd carries a default linux-dev line; the device is
+# the machine record's kanata_dev, else the built-in i8042 keyboard,
+# else none (kanata then grabs every keyboard).
+set -u
+
+kbd=${KANATA_KBD:-/etc/kanata/kanata.kbd}
+out=${KANATA_OUT:-/run/kanata/kanata.kbd}
+by_path=${BY_PATH:-/dev/input/by-path}
+conf=${MACHINE_CONF:-/etc/machine.conf}
+
+dev=$(sed -n "s/^kanata_dev=//p" "$conf" 2>/dev/null | tail -n 1)
+if [ -n "$dev" ]; then
+    why=record
+else
+    dev=$(printf '%s\n' "$by_path"/platform-i8042-serio-*-event-kbd | sort | head -n 1)
+    if [ -e "$dev" ]; then
+        why=built-in
+    else
+        dev=
+    fi
+fi
+
+mkdir -p "$(dirname "$out")" || exit 1
+if [ -n "$dev" ]; then
+    echo "kanata-launch: device $dev ($why)" >&2
+else
+    echo "kanata-launch: every keyboard" >&2
+fi
+# Replace the linux-dev line, or drop it (no device), or insert one
+# straight after "(defcfg" when the file has none.
+awk -v dev="$dev" '
+    /^[ \t]*linux-dev[ \t]/ { if (dev != "" && !seen) lines[++n] = "  linux-dev " dev; seen = 1; next }
+    { lines[++n] = $0 }
+    END {
+        for (i = 1; i <= n; i++) {
+            print lines[i]
+            if (!seen && dev != "" && !ins && lines[i] ~ /^\(defcfg/) { print "  linux-dev " dev; ins = 1 }
+        }
+    }
+' "$kbd" > "$out" || exit 1
+
+exec "${KANATA_BIN:-/usr/bin/kanata}" -c "$out"
