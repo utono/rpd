@@ -133,6 +133,7 @@ configure_kanata_service() {
     local launch_src="${path}/bin/kanata-launch"
     local launch_dest="/usr/local/bin/kanata-launch"
     if [ -f "$launch_src" ]; then
+        sudo chmod +x "$launch_src"
         sudo ln -sf "$launch_src" "$launch_dest"
         log_message "INFO" "Linked $launch_src -> $launch_dest"
     else

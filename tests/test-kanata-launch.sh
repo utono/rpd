@@ -52,6 +52,11 @@ if diff <(sed 2d "$t/out4.kbd") "$t/nodev.kbd" > /dev/null; then ok insert-rest-
 run "$t/bp-none" "$t/nodev.kbd" "$t/out5.kbd" "$t/none.conf"
 if cmp -s "$t/nodev.kbd" "$t/out5.kbd"; then ok nodev-nodevice-unchanged; else bad nodev-nodevice-unchanged; fi
 
+# several linux-dev lines: one replacement (the first), rest dropped
+printf '(defcfg\n  linux-dev /a\n  linux-dev /b\n  process-unmapped-keys yes\n)\n' > "$t/multi.kbd"
+run "$t/bp-with" "$t/multi.kbd" "$t/out6.kbd" "$t/none.conf"
+if [ "$(rg -c linux-dev "$t/out6.kbd")" = 1 ] && [ "$(sed -n 2p "$t/out6.kbd")" = "$want" ]; then ok multi-one-line; else bad multi-one-line; fi
+
 # output directory is created
 run "$t/bp-with" "$t/in.kbd" "$t/sub/dir/out.kbd" "$t/none.conf"
 if [ -f "$t/sub/dir/out.kbd" ]; then ok creates-out-dir; else bad creates-out-dir; fi

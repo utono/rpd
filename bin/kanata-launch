@@ -31,7 +31,7 @@ fi
 # Replace the linux-dev line, or drop it (no device), or insert one
 # straight after "(defcfg" when the file has none.
 awk -v dev="$dev" '
-    /^[ \t]*linux-dev[ \t]/ { if (dev != "") lines[++n] = "  linux-dev " dev; seen = 1; next }
+    /^[ \t]*linux-dev[ \t]/ { if (dev != "" && !seen) lines[++n] = "  linux-dev " dev; seen = 1; next }
     { lines[++n] = $0 }
     END {
         for (i = 1; i <= n; i++) {
