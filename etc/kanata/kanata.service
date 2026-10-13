@@ -4,7 +4,8 @@ After=local-fs.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/kanata -c /etc/kanata/kanata.kbd
+ExecStart=/usr/local/bin/kanata-launch
+RuntimeDirectory=kanata
 Restart=on-failure
 RestartSec=3
 

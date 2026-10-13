@@ -24,7 +24,13 @@ The kanata config (`etc/kanata/kanata.kbd`) has two layers:
 
 Timing is controlled via `defvar`: `tap-time` (200ms), `hold-time` (200ms), and `index-hold-time` (150ms for f/j). The `tap-hold-release` algorithm only triggers a modifier when another key is pressed *and released* while holding, preventing accidental activation during fast typing.
 
-Device targeting uses explicit paths in `defcfg` via `linux-dev`.
+Device targeting is in `defcfg` via `linux-dev`. The tracked line is only
+default text: the unit runs `bin/kanata-launch` (linked to
+`/usr/local/bin/kanata-launch`), which writes `/run/kanata/kanata.kbd` with
+that line set from `kanata_dev` in `/etc/machine.conf`, else the first
+`/dev/input/by-path/platform-i8042-serio-*-event-kbd`, else removed (kanata
+grabs every keyboard), and execs kanata on the result. Edit
+`etc/kanata/kanata.kbd`, not the `/run` copy.
 
 ## Deployment
 
@@ -71,6 +77,9 @@ sudo systemctl restart kanata
 # Check kanata is running
 sudo systemctl status kanata
 
+# Run the launcher's tests
+bash tests/test-kanata-launch.sh
+
 # Validate config syntax
 kanata --check -c etc/kanata/kanata.kbd
 ```
@@ -80,6 +89,7 @@ kanata --check -c etc/kanata/kanata.kbd
 | Source in repo | Deployed to | Method |
 |---|---|---|
 | `etc/kanata/kanata.kbd` | `/etc/kanata/kanata.kbd` | symlink |
+| `bin/kanata-launch` | `/usr/local/bin/kanata-launch` | symlink |
 | `etc/kanata/kanata.service` | `/etc/systemd/system/kanata.service` | copy |
 | `kbd/.../real_prog_dvorak.map.gz` | `/usr/share/kbd/keymaps/i386/dvorak/` | rsync copy |
 | `xkb/.../real_prog_dvorak` | `/usr/share/X11/xkb/symbols/` | rsync copy |
